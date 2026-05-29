@@ -2,27 +2,40 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>廣義角三角比與對稱性互動教具</title>
     <style>
+        /* 採用彈性佈局，確保全螢幕縮放 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f5f7fa;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             color: #333;
+            box-sizing: border-box;
         }
         h1 {
-            margin-bottom: 10px;
+            font-size: 1.6rem;
+            margin: 10px 0 5px 0;
+            text-align: center;
             color: #2c3e50;
+        }
+        .sub-title {
+            margin-top: 0; 
+            margin-bottom: 15px;
+            color: #666; 
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0 10px;
         }
         .container {
             display: flex;
+            flex-direction: row; /* 電腦版左右並排 */
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             width: 100%;
             max-width: 1200px;
@@ -31,37 +44,47 @@
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 15px;
+            padding: 10px;
+            width: 100%;
+            max-width: 620px; /* 限制電腦版最大寬度 */
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         canvas {
             cursor: crosshair;
             display: block;
+            width: 100%; /* 關鍵：讓畫布寬度跟隨外框自動縮放 */
+            height: auto;
+            max-width: 600px;
         }
         .control-panel {
             flex: 1;
-            min-width: 400px;
+            min-width: 320px;
             max-width: 500px;
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            box-sizing: border-box;
         }
         .data-display {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 12px;
             border-left: 4px solid #3498db;
-            font-size: 1.05rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
         .formula-section {
             margin-top: 5px;
         }
         .section-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
             color: #7f8c8d;
             margin-bottom: 5px;
@@ -71,41 +94,58 @@
         .checkbox-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 10px;
         }
         .checkbox-label {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            font-size: 0.95rem;
-            padding: 4px 6px;
+            font-size: 0.85rem;
+            padding: 5px 6px;
             border-radius: 4px;
             transition: background 0.2s;
+            line-height: 1.3;
         }
         .checkbox-label:hover {
             background-color: #f0f4f8;
+        }
+        .checkbox-label input {
+            transform: scale(1.1);
+            flex-shrink: 0;
         }
         .math-text {
             font-family: 'Times New Roman', Times, serif;
             font-style: italic;
         }
         .info-tip {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #666;
             line-height: 1.4;
+        }
+
+        /* 響應式斷點設定：當螢幕寬度小於 800px（如手機、直立型平板）*/
+        @media (max-width: 800px) {
+            .container {
+                flex-direction: column; /* 強制切換為上下排列 */
+                align-items: center;
+            }
+            .control-panel {
+                width: 100%;
+                max-width: 620px;
+            }
         }
     </style>
 </head>
 <body>
 
     <h1>廣義角三角比的角度轉換公式</h1>
-    <p style="margin-top: 0; color: #666;">請拖曳圓周上的藍點 <span class="math-text">P</span>，並勾選右側選單觀察對稱點 <span class="math-text">P'</span> 與轉換角弧線。</p>
+    <p class="sub-title">請拖曳圓周上的藍點 <span class="math-text">P</span>，並勾選下方選單觀察對稱點 <span class="math-text">P'</span> 與轉換角弧線。</p>
 
     <div class="container">
         <div class="canvas-container">
-            <canvas id="circleCanvas" width="650" height="650"></canvas>
+            <canvas id="circleCanvas" width="600" height="600"></canvas>
         </div>
 
         <div class="control-panel">
@@ -154,12 +194,11 @@
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 3px 0;">
 
             <div class="info-tip">
                 <strong>💡 課堂引導建議：</strong><br>
-                1. 綠色弧線代表原始角 <span class="math-text">&theta;</span>；<strong>橘色弧線</strong>代表轉換後的廣義角。<br>
-                2. 引導學生口訣：與 <span class="math-text">x</span> 軸相關的角度（180°, 360°）函數名稱不變；與 <span class="math-text">y</span> 軸相關的角度（90°, 270°）函數正餘互換（如 <span class="math-text">cos</span> 變 <span class="math-text">sin</span>）。正負號則完全由 <span class="math-text">P'</span> 所在的象限決定。
+                綠色代表原始角 <span class="math-text">&theta;</span>；<strong>橘色</strong>代表轉換後的廣義角。引導學生透過對稱性觀察 <span class="math-text">P'</span> 與 <span class="math-text">P</span> 的座標正負號與絕對值關係。
             </div>
         </div>
     </div>
@@ -168,29 +207,26 @@
         const canvas = document.getElementById('circleCanvas');
         const ctx = canvas.getContext('2d');
         
-        // 稍微調大畫布中心
-        const cx = 325;
-        const cy = 325;
-        const radius = 220; 
+        // 畫布內部邏輯座標固定為 600x600 運算
+        const cx = 300;
+        const cy = 300;
+        const radius = 200; 
 
         let thetaDeg = 30; 
         let isDragging = false;
 
-        // 八組公式單選控制
         function toggleCheckbox(selectedId) {
             const ids = [
                 'chk_pi_minus', 'chk_pi_plus', 'chk_neg', 
                 'chk_90_minus', 'chk_90_plus', 'chk_270_minus', 'chk_270_plus'
             ];
             ids.forEach(id => {
-                if (id !== selectedId) {
-                    document.getElementById(id).checked = false;
-                }
+                if (id !== selectedId) document.getElementById(id).checked = false;
             });
             draw();
         }
 
-        // 監聽事件
+        // 行動裝置與電腦端事件監聽
         canvas.addEventListener('mousedown', startDrag);
         canvas.addEventListener('mousemove', drag);
         window.addEventListener('mouseup', endDrag);
@@ -205,7 +241,7 @@
             const pY = cy - radius * Math.sin(rad);
             const dist = Math.hypot(pos.x - pX, pos.y - pY);
             
-            if (dist < 30) { 
+            if (dist < 35) { // 加大手機觸控判定範圍
                 isDragging = true;
                 e.preventDefault();
             }
@@ -227,48 +263,49 @@
             isDragging = false;
         }
 
+        // 關鍵修正：計算滑鼠/點擊位置時，引入比例換算，確保在縮小的網頁上依然精準
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
+            
+            // 由於 CSS 縮放了畫布，所以要把實際點擊座標依比例映射回 600x600 的畫布內部座標
+            return { 
+                x: (clientX - rect.left) * (canvas.width / rect.width), 
+                y: (clientY - rect.top) * (canvas.height / rect.height) 
+            };
         }
 
-        // 畫原始角度 θ 的綠色弧線
         function drawThetaArc(angleDeg, color) {
             if (angleDeg <= 0) return;
             ctx.beginPath();
             ctx.strokeStyle = color;
             ctx.lineWidth = 2.5;
-            ctx.arc(cx, cy, 45, 0, -angleDeg * Math.PI / 180, true);
+            ctx.arc(cx, cy, 40, 0, -angleDeg * Math.PI / 180, true);
             ctx.stroke();
 
             const midRad = (angleDeg / 2) * Math.PI / 180;
-            const textX = cx + 60 * Math.cos(midRad);
-            const textY = cy - 60 * Math.sin(midRad);
+            const textX = cx + 55 * Math.cos(midRad);
+            const textY = cy - 55 * Math.sin(midRad);
             ctx.font = 'italic bold 16px Arial';
             ctx.fillStyle = color;
             ctx.fillText('θ', textX - 4, textY + 5);
         }
 
-        // 新增功能：畫轉換公式廣義角（橘色長弧線）
         function drawTargetArc(targetDeg, labelText) {
             ctx.beginPath();
-            ctx.strokeStyle = '#e67e22'; // 統一用亮橘色標記大角度
+            ctx.strokeStyle = '#e67e22'; 
             ctx.lineWidth = 1.5;
             
-            // 處理負角度使弧線繪製正常
             let displayDeg = targetDeg;
             while (displayDeg < 0) displayDeg += 360;
             
-            ctx.arc(cx, cy, 75, 0, -displayDeg * Math.PI / 180, true);
+            ctx.arc(cx, cy, 65, 0, -displayDeg * Math.PI / 180, true);
             ctx.stroke();
 
-            // 將標記文字放在橘色弧線的中點
             const midRad = (displayDeg / 2) * Math.PI / 180;
-            // 稍微把字往外推到半徑 100 的地方，避免跟 θ 重疊
-            const textX = cx + 105 * Math.cos(midRad);
-            const textY = cy - 105 * Math.sin(midRad);
+            const textX = cx + 90 * Math.cos(midRad);
+            const textY = cy - 90 * Math.sin(midRad);
             
             ctx.font = 'bold 13px Arial';
             ctx.fillStyle = '#d35400';
@@ -278,7 +315,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. 畫坐標軸
+            // 1. 坐標軸
             ctx.beginPath();
             ctx.strokeStyle = '#cccccc';
             ctx.lineWidth = 1.5;
@@ -291,25 +328,25 @@
             ctx.fillText('x', canvas.width - 15, cy - 8);
             ctx.fillText('y', cx + 8, 15);
 
-            // 2. 畫單位圓
+            // 2. 單位圓
             ctx.beginPath();
             ctx.strokeStyle = '#34495e';
             ctx.lineWidth = 2;
             ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
             ctx.stroke();
 
-            // 3. 畫 y = x 參考線 (當點選 90°-θ 時顯示)
+            // 3. y = x 參考線
             if (document.getElementById('chk_90_minus').checked) {
                 ctx.beginPath();
                 ctx.setLineDash([3, 3]);
                 ctx.strokeStyle = '#7f8c8d';
-                ctx.moveTo(cx - radius*1.2, cy + radius*1.2);
-                ctx.lineTo(cx + radius*1.2, cy - radius*1.2);
+                ctx.moveTo(cx - radius*1.1, cy + radius*1.1);
+                ctx.lineTo(cx + radius*1.1, cy - radius*1.1);
                 ctx.stroke();
                 ctx.setLineDash([]);
             }
 
-            // 4. 計算並繪製主動點 P
+            // 4. 繪製主動點 P
             const radP = thetaDeg * Math.PI / 180;
             const pX = cx + radius * Math.cos(radP);
             const pY = cy - radius * Math.sin(radP);
@@ -331,21 +368,20 @@
             ctx.arc(pX, pY, 12, 0, 2 * Math.PI);
             ctx.stroke();
 
-            // 標註 P 座標
-            ctx.font = 'bold 15px Arial';
+            // 標註 P 座標 (稍微縮減邊距避免超出畫面)
+            ctx.font = 'bold 14px Arial';
             ctx.fillStyle = '#3498db';
-            let offsetX = Math.cos(radP) >= 0 ? 15 : -145;
-            let offsetY = Math.sin(radP) >= 0 ? -15 : 20;
+            let offsetX = Math.cos(radP) >= 0 ? 12 : -135;
+            let offsetY = Math.sin(radP) >= 0 ? -12 : 18;
             ctx.fillText(`P(cos ${thetaDeg}°, sin ${thetaDeg}°)`, pX + offsetX, pY + offsetY);
 
-            // 畫綠色角度弧線 θ
             drawThetaArc(thetaDeg, '#27ae60');
 
-            // 5. 更新右側面板基本資訊
+            // 5. 面板基本資訊
             document.getElementById('degValue').innerText = thetaDeg;
             document.getElementById('pCoordDisplay').innerText = `P(cos ${thetaDeg}°, sin ${thetaDeg}°)`;
 
-            // 6. 計算與繪製對稱點 P' (從 4 組擴充至 8 組)
+            // 6. 計算與繪製對稱點 P'
             let showPrime = false;
             let pPrimeTheta = 0;
             let pPrimeLabel = '';
@@ -362,7 +398,7 @@
             } else if (document.getElementById('chk_90_plus').checked) {
                 showPrime = true; pPrimeTheta = 90 + thetaDeg; pPrimeLabel = '90° + θ'; pPrimeColor = '#16a085';
             } else if (document.getElementById('chk_270_minus').checked) {
-                showPrime = true; pPrimeTheta = 270 - thetaDeg; pPrimeLabel = '270° - θ'; pPrimeColor = '#d35400';
+                showPrime = true; pPrimeTheta = 270 - thetaDeg; pPrimeLabel = '270° - θ'; pPrimeColor = '#795548'; // 改用深棕
             } else if (document.getElementById('chk_270_plus').checked) {
                 showPrime = true; pPrimeTheta = 270 + thetaDeg; pPrimeLabel = '270° + θ'; pPrimeColor = '#8e44ad';
             }
@@ -373,7 +409,7 @@
                 const ppX = cx + radius * Math.cos(radPPrime);
                 const ppY = cy - radius * Math.sin(radPPrime);
 
-                // 畫對稱連接虛線
+                // 對稱連接虛線
                 ctx.beginPath();
                 ctx.setLineDash([4, 4]);
                 ctx.strokeStyle = pPrimeColor + 'aa';
@@ -381,30 +417,29 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // 畫 P' 的徑向線
+                // P' 徑向線
                 ctx.beginPath();
                 ctx.strokeStyle = pPrimeColor;
                 ctx.lineWidth = 1.2;
                 ctx.moveTo(cx, cy); ctx.lineTo(ppX, ppY);
                 ctx.stroke();
 
-                // 畫 P' 點
+                // P' 實心點
                 ctx.beginPath();
                 ctx.fillStyle = pPrimeColor;
                 ctx.arc(ppX, ppY, 6, 0, 2 * Math.PI);
                 ctx.fill();
 
                 // 標註 P' 座標
-                ctx.font = 'bold 15px Arial';
+                ctx.font = 'bold 14px Arial';
                 ctx.fillStyle = pPrimeColor;
-                let ppOffsetX = Math.cos(radPPrime) >= 0 ? 15 : -215;
-                let ppOffsetY = Math.sin(radPPrime) >= 0 ? -15 : 20;
+                let ppOffsetX = Math.cos(radPPrime) >= 0 ? 12 : -205;
+                let ppOffsetY = Math.sin(radPPrime) >= 0 ? -12 : 18;
                 ctx.fillText(`P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`, ppX + ppOffsetX, ppY + ppOffsetY);
 
-                // 【全新功能】在圖形上畫出大廣義角的橘色弧線
+                // 繪製大廣義角橘色弧線
                 drawTargetArc(pPrimeTheta, pPrimeLabel);
 
-                // 更新面板資訊
                 pPrimeDisplayNode.style.display = 'block';
                 pPrimeDisplayNode.innerHTML = `<span class="math-text" style="color:${pPrimeColor}; font-weight:bold;">P'</span> 點座標：P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`;
             } else {
