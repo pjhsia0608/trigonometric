@@ -339,4 +339,118 @@
             ctx.stroke();
 
             // 3. y = x 參考線
-            if (
+            if (document.getElementById('chk_90_minus').checked) {
+                ctx.beginPath();
+                ctx.setLineDash([3, 3]);
+                ctx.strokeStyle = '#7f8c8d';
+                ctx.moveTo(cx - radius*1.1, cy + radius*1.1);
+                ctx.lineTo(cx - radius*1.1, cy - radius*1.1);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 4. 繪製主動點 P
+            const radP = thetaDeg * Math.PI / 180;
+            const pX = cx + radius * Math.cos(radP);
+            const pY = cy - radius * Math.sin(radP);
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(cx, cy); ctx.lineTo(pX, pY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#3498db';
+            ctx.arc(pX, pY, 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db44';
+            ctx.lineWidth = 3;
+            ctx.arc(pX, pY, 12, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 標註 P 座標
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#3498db';
+            let offsetX = Math.cos(radP) >= 0 ? 12 : -135;
+            let offsetY = Math.sin(radP) >= 0 ? -12 : 18;
+            ctx.fillText(`P(cos ${thetaDeg}°, sin ${thetaDeg}°)`, pX + offsetX, pY + offsetY);
+
+            drawThetaArc(thetaDeg, '#27ae60');
+
+            // 5. 面板基本資訊
+            document.getElementById('degValue').innerText = thetaDeg;
+            document.getElementById('pCoordDisplay').innerText = `P(cos ${thetaDeg}°, sin ${thetaDeg}°)`;
+
+            // 6. 計算與繪製對稱點 P'
+            let showPrime = false;
+            let pPrimeTheta = 0;
+            let pPrimeLabel = '';
+            let pPrimeColor = '';
+
+            if (document.getElementById('chk_pi_minus').checked) {
+                showPrime = true; pPrimeTheta = 180 - thetaDeg; pPrimeLabel = '180° - θ'; pPrimeColor = '#e74c3c';
+            } else if (document.getElementById('chk_pi_plus').checked) {
+                showPrime = true; pPrimeTheta = 180 + thetaDeg; pPrimeLabel = '180° + θ'; pPrimeColor = '#e67e22';
+            } else if (document.getElementById('chk_neg').checked) {
+                showPrime = true; pPrimeTheta = -thetaDeg; pPrimeLabel = '-θ'; pPrimeColor = '#9b59b6';
+            } else if (document.getElementById('chk_90_minus').checked) {
+                showPrime = true; pPrimeTheta = 90 - thetaDeg; pPrimeLabel = '90° - θ'; pPrimeColor = '#2980b9';
+            } else if (document.getElementById('chk_90_plus').checked) {
+                showPrime = true; pPrimeTheta = 90 + thetaDeg; pPrimeLabel = '90° + θ'; pPrimeColor = '#16a085';
+            } else if (document.getElementById('chk_270_minus').checked) {
+                showPrime = true; pPrimeTheta = 270 - thetaDeg; pPrimeLabel = '270° - θ'; pPrimeColor = '#795548';
+            } else if (document.getElementById('chk_270_plus').checked) {
+                showPrime = true; pPrimeTheta = 270 + thetaDeg; pPrimeLabel = '270° + θ'; pPrimeColor = '#8e44ad';
+            }
+
+            const pPrimeDisplayNode = document.getElementById('pPrimeDisplay');
+            if (showPrime) {
+                const radPPrime = pPrimeTheta * Math.PI / 180;
+                const ppX = cx + radius * Math.cos(radPPrime);
+                const ppY = cy - radius * Math.sin(radPPrime);
+
+                // 對稱連接虛線
+                ctx.beginPath();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = pPrimeColor + 'aa';
+                ctx.moveTo(pX, pY); ctx.lineTo(ppX, ppY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // P' 徑向線
+                ctx.beginPath();
+                ctx.strokeStyle = pPrimeColor;
+                ctx.lineWidth = 1.2;
+                ctx.moveTo(cx, cy); ctx.lineTo(ppX, ppY);
+                ctx.stroke();
+
+                // P' 實心點
+                ctx.beginPath();
+                ctx.fillStyle = pPrimeColor;
+                ctx.arc(ppX, ppY, 6, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // 標註 P' 座標
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = pPrimeColor;
+                let ppOffsetX = Math.cos(radPPrime) >= 0 ? 12 : -205;
+                let ppOffsetY = Math.sin(radPPrime) >= 0 ? -12 : 18;
+                ctx.fillText(`P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`, ppX + ppOffsetX, ppY + ppOffsetY);
+
+                // 繪製大廣義角橘色弧線
+                drawTargetArc(pPrimeTheta, pPrimeLabel);
+
+                pPrimeDisplayNode.style.display = 'block';
+                pPrimeDisplayNode.innerHTML = `<span class="math-text" style="color:${pPrimeColor}; font-weight:bold;">P'</span> 點座標：P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`;
+            } else {
+                pPrimeDisplayNode.style.display = 'none';
+            }
+        }
+
+        draw();
+    </script>
+</body>
+</html>
