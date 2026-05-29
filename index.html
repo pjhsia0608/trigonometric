@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廣義角三角比與對稱性互動教具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        h1 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .canvas-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        canvas {
+            cursor: crosshair;
+            display: block;
+        }
+        .control-panel {
+            flex: 1;
+            min-width: 400px;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .data-display {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #3498db;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+        .formula-section {
+            margin-top: 5px;
+        }
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 3px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            padding: 4px 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .checkbox-label:hover {
+            background-color: #f0f4f8;
+        }
+        .math-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .info-tip {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>廣義角三角比的角度轉換公式</h1>
+    <p style="margin-top: 0; color: #666;">請拖曳圓周上的藍點 <span class="math-text">P</span>，並勾選右側選單觀察對稱點 <span class="math-text">P'</span> 與轉換角弧線。</p>
+
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="circleCanvas" width="650" height="650"></canvas>
+        </div>
+
+        <div class="control-panel">
+            <div class="data-display">
+                <strong>當前角度與座標：</strong><br>
+                角度 <span class="math-text">&theta;</span> = <span id="degValue" style="color:#27ae60; font-weight:bold;">30</span>°<br>
+                <span class="math-text" style="color:#3498db; font-weight:bold;">P</span> 點座標：<span id="pCoordDisplay">P(cos 30°, sin 30°)</span><br>
+                <span id="pPrimeDisplay" style="display:none;"></span>
+            </div>
+
+            <div class="formula-section">
+                <div class="section-title">與 x 軸 (180°, 360°) 相關變換</div>
+                <div class="checkbox-group">
+                    <label class="checkbox-label" style="color: #e74c3c;">
+                        <input type="checkbox" id="chk_pi_minus" onchange="toggleCheckbox('chk_pi_minus')">
+                        <span>P'(cos(180° - &theta;), sin(180° - &theta;)) — y 軸對稱</span>
+                    </label>
+                    <label class="checkbox-label" style="color: #e67e22;">
+                        <input type="checkbox" id="chk_pi_plus" onchange="toggleCheckbox('chk_pi_plus')">
+                        <span>P'(cos(180° + &theta;), sin(180° + &theta;)) — 原點對稱</span>
+                    </label>
+                    <label class="checkbox-label" style="color: #9b59b6;">
+                        <input type="checkbox" id="chk_neg" onchange="toggleCheckbox('chk_neg')">
+                        <span>P'(cos(-&theta;), sin(-&theta;)) — x 軸對稱</span>
+                    </label>
+                </div>
+
+                <div class="section-title">與 y 軸 (90°, 270°) 相關變換</div>
+                <div class="checkbox-group">
+                    <label class="checkbox-label" style="color: #2980b9;">
+                        <input type="checkbox" id="chk_90_minus" onchange="toggleCheckbox('chk_90_minus')">
+                        <span>P'(cos(90° - &theta;), sin(90° - &theta;)) — 關於 y = x 對稱</span>
+                    </label>
+                    <label class="checkbox-label" style="color: #16a085;">
+                        <input type="checkbox" id="chk_90_plus" onchange="toggleCheckbox('chk_90_plus')">
+                        <span>P'(cos(90° + &theta;), sin(90° + &theta;))</span>
+                    </label>
+                    <label class="checkbox-label" style="color: #d35400;">
+                        <input type="checkbox" id="chk_270_minus" onchange="toggleCheckbox('chk_270_minus')">
+                        <span>P'(cos(270° - &theta;), sin(270° - &theta;))</span>
+                    </label>
+                    <label class="checkbox-label" style="color: #8e44ad;">
+                        <input type="checkbox" id="chk_270_plus" onchange="toggleCheckbox('chk_270_plus')">
+                        <span>P'(cos(270° + &theta;), sin(270° + &theta;))</span>
+                    </label>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+
+            <div class="info-tip">
+                <strong>💡 課堂引導建議：</strong><br>
+                1. 綠色弧線代表原始角 <span class="math-text">&theta;</span>；<strong>橘色弧線</strong>代表轉換後的廣義角。<br>
+                2. 引導學生口訣：與 <span class="math-text">x</span> 軸相關的角度（180°, 360°）函數名稱不變；與 <span class="math-text">y</span> 軸相關的角度（90°, 270°）函數正餘互換（如 <span class="math-text">cos</span> 變 <span class="math-text">sin</span>）。正負號則完全由 <span class="math-text">P'</span> 所在的象限決定。
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('circleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 稍微調大畫布中心
+        const cx = 325;
+        const cy = 325;
+        const radius = 220; 
+
+        let thetaDeg = 30; 
+        let isDragging = false;
+
+        // 八組公式單選控制
+        function toggleCheckbox(selectedId) {
+            const ids = [
+                'chk_pi_minus', 'chk_pi_plus', 'chk_neg', 
+                'chk_90_minus', 'chk_90_plus', 'chk_270_minus', 'chk_270_plus'
+            ];
+            ids.forEach(id => {
+                if (id !== selectedId) {
+                    document.getElementById(id).checked = false;
+                }
+            });
+            draw();
+        }
+
+        // 監聽事件
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('mousemove', drag);
+        window.addEventListener('mouseup', endDrag);
+        canvas.addEventListener('touchstart', startDrag, {passive: false});
+        canvas.addEventListener('touchmove', drag, {passive: false});
+        window.addEventListener('touchend', endDrag);
+
+        function startDrag(e) {
+            const pos = getMousePos(e);
+            const rad = thetaDeg * Math.PI / 180;
+            const pX = cx + radius * Math.cos(rad);
+            const pY = cy - radius * Math.sin(rad);
+            const dist = Math.hypot(pos.x - pX, pos.y - pY);
+            
+            if (dist < 30) { 
+                isDragging = true;
+                e.preventDefault();
+            }
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            let angleRad = Math.atan2(cy - pos.y, pos.x - cx);
+            if (angleRad < 0) angleRad += 2 * Math.PI;
+            
+            thetaDeg = Math.round(angleRad * 180 / Math.PI);
+            if (thetaDeg === 360) thetaDeg = 0;
+            draw();
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        // 畫原始角度 θ 的綠色弧線
+        function drawThetaArc(angleDeg, color) {
+            if (angleDeg <= 0) return;
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.arc(cx, cy, 45, 0, -angleDeg * Math.PI / 180, true);
+            ctx.stroke();
+
+            const midRad = (angleDeg / 2) * Math.PI / 180;
+            const textX = cx + 60 * Math.cos(midRad);
+            const textY = cy - 60 * Math.sin(midRad);
+            ctx.font = 'italic bold 16px Arial';
+            ctx.fillStyle = color;
+            ctx.fillText('θ', textX - 4, textY + 5);
+        }
+
+        // 新增功能：畫轉換公式廣義角（橘色長弧線）
+        function drawTargetArc(targetDeg, labelText) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#e67e22'; // 統一用亮橘色標記大角度
+            ctx.lineWidth = 1.5;
+            
+            // 處理負角度使弧線繪製正常
+            let displayDeg = targetDeg;
+            while (displayDeg < 0) displayDeg += 360;
+            
+            ctx.arc(cx, cy, 75, 0, -displayDeg * Math.PI / 180, true);
+            ctx.stroke();
+
+            // 將標記文字放在橘色弧線的中點
+            const midRad = (displayDeg / 2) * Math.PI / 180;
+            // 稍微把字往外推到半徑 100 的地方，避免跟 θ 重疊
+            const textX = cx + 105 * Math.cos(midRad);
+            const textY = cy - 105 * Math.sin(midRad);
+            
+            ctx.font = 'bold 13px Arial';
+            ctx.fillStyle = '#d35400';
+            ctx.fillText(labelText, textX - 20, textY + 5);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 畫坐標軸
+            ctx.beginPath();
+            ctx.strokeStyle = '#cccccc';
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+            ctx.stroke();
+
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#888888';
+            ctx.fillText('x', canvas.width - 15, cy - 8);
+            ctx.fillText('y', cx + 8, 15);
+
+            // 2. 畫單位圓
+            ctx.beginPath();
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 2;
+            ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 3. 畫 y = x 參考線 (當點選 90°-θ 時顯示)
+            if (document.getElementById('chk_90_minus').checked) {
+                ctx.beginPath();
+                ctx.setLineDash([3, 3]);
+                ctx.strokeStyle = '#7f8c8d';
+                ctx.moveTo(cx - radius*1.2, cy + radius*1.2);
+                ctx.lineTo(cx + radius*1.2, cy - radius*1.2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 4. 計算並繪製主動點 P
+            const radP = thetaDeg * Math.PI / 180;
+            const pX = cx + radius * Math.cos(radP);
+            const pY = cy - radius * Math.sin(radP);
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(cx, cy); ctx.lineTo(pX, pY);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#3498db';
+            ctx.arc(pX, pY, 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db44';
+            ctx.lineWidth = 3;
+            ctx.arc(pX, pY, 12, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 標註 P 座標
+            ctx.font = 'bold 15px Arial';
+            ctx.fillStyle = '#3498db';
+            let offsetX = Math.cos(radP) >= 0 ? 15 : -145;
+            let offsetY = Math.sin(radP) >= 0 ? -15 : 20;
+            ctx.fillText(`P(cos ${thetaDeg}°, sin ${thetaDeg}°)`, pX + offsetX, pY + offsetY);
+
+            // 畫綠色角度弧線 θ
+            drawThetaArc(thetaDeg, '#27ae60');
+
+            // 5. 更新右側面板基本資訊
+            document.getElementById('degValue').innerText = thetaDeg;
+            document.getElementById('pCoordDisplay').innerText = `P(cos ${thetaDeg}°, sin ${thetaDeg}°)`;
+
+            // 6. 計算與繪製對稱點 P' (從 4 組擴充至 8 組)
+            let showPrime = false;
+            let pPrimeTheta = 0;
+            let pPrimeLabel = '';
+            let pPrimeColor = '';
+
+            if (document.getElementById('chk_pi_minus').checked) {
+                showPrime = true; pPrimeTheta = 180 - thetaDeg; pPrimeLabel = '180° - θ'; pPrimeColor = '#e74c3c';
+            } else if (document.getElementById('chk_pi_plus').checked) {
+                showPrime = true; pPrimeTheta = 180 + thetaDeg; pPrimeLabel = '180° + θ'; pPrimeColor = '#e67e22';
+            } else if (document.getElementById('chk_neg').checked) {
+                showPrime = true; pPrimeTheta = -thetaDeg; pPrimeLabel = '-θ'; pPrimeColor = '#9b59b6';
+            } else if (document.getElementById('chk_90_minus').checked) {
+                showPrime = true; pPrimeTheta = 90 - thetaDeg; pPrimeLabel = '90° - θ'; pPrimeColor = '#2980b9';
+            } else if (document.getElementById('chk_90_plus').checked) {
+                showPrime = true; pPrimeTheta = 90 + thetaDeg; pPrimeLabel = '90° + θ'; pPrimeColor = '#16a085';
+            } else if (document.getElementById('chk_270_minus').checked) {
+                showPrime = true; pPrimeTheta = 270 - thetaDeg; pPrimeLabel = '270° - θ'; pPrimeColor = '#d35400';
+            } else if (document.getElementById('chk_270_plus').checked) {
+                showPrime = true; pPrimeTheta = 270 + thetaDeg; pPrimeLabel = '270° + θ'; pPrimeColor = '#8e44ad';
+            }
+
+            const pPrimeDisplayNode = document.getElementById('pPrimeDisplay');
+            if (showPrime) {
+                const radPPrime = pPrimeTheta * Math.PI / 180;
+                const ppX = cx + radius * Math.cos(radPPrime);
+                const ppY = cy - radius * Math.sin(radPPrime);
+
+                // 畫對稱連接虛線
+                ctx.beginPath();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = pPrimeColor + 'aa';
+                ctx.moveTo(pX, pY); ctx.lineTo(ppX, ppY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // 畫 P' 的徑向線
+                ctx.beginPath();
+                ctx.strokeStyle = pPrimeColor;
+                ctx.lineWidth = 1.2;
+                ctx.moveTo(cx, cy); ctx.lineTo(ppX, ppY);
+                ctx.stroke();
+
+                // 畫 P' 點
+                ctx.beginPath();
+                ctx.fillStyle = pPrimeColor;
+                ctx.arc(ppX, ppY, 6, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // 標註 P' 座標
+                ctx.font = 'bold 15px Arial';
+                ctx.fillStyle = pPrimeColor;
+                let ppOffsetX = Math.cos(radPPrime) >= 0 ? 15 : -215;
+                let ppOffsetY = Math.sin(radPPrime) >= 0 ? -15 : 20;
+                ctx.fillText(`P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`, ppX + ppOffsetX, ppY + ppOffsetY);
+
+                // 【全新功能】在圖形上畫出大廣義角的橘色弧線
+                drawTargetArc(pPrimeTheta, pPrimeLabel);
+
+                // 更新面板資訊
+                pPrimeDisplayNode.style.display = 'block';
+                pPrimeDisplayNode.innerHTML = `<span class="math-text" style="color:${pPrimeColor}; font-weight:bold;">P'</span> 點座標：P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`;
+            } else {
+                pPrimeDisplayNode.style.display = 'none';
+            }
+        }
+
+        // 啟動首次繪製
+        draw();
+    </script>
+</body>
+</html>
