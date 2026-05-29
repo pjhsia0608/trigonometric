@@ -5,23 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>廣義角三角比與對稱性互動教具</title>
     <style>
-        /* 採用彈性佈局，確保全螢幕縮放 */
+        /* 全域重設，確保徹底消除各家瀏覽器的預設邊距 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f5f7fa;
-            margin: 0;
-            padding: 10px;
+            padding: 15px 10px;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: center; /* 確保全域水平置中 */
             color: #333;
-            box-sizing: border-box;
+            width: 100%;
+            overflow-x: hidden; /* 防止手機出現左右無意義的滾動條 */
         }
         h1 {
-            font-size: 1.6rem;
-            margin: 10px 0 5px 0;
+            font-size: 1.5rem;
+            margin: 5px 0 8px 0;
             text-align: center;
             color: #2c3e50;
+            width: 100%;
         }
         .sub-title {
             margin-top: 0; 
@@ -30,39 +36,41 @@
             font-size: 0.9rem;
             text-align: center;
             padding: 0 10px;
+            width: 100%;
+            line-height: 1.4;
         }
         .container {
             display: flex;
             flex-direction: row; /* 電腦版左右並排 */
-            flex-wrap: wrap;
             gap: 15px;
             justify-content: center;
+            align-items: flex-start;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1150px;
         }
         .canvas-container {
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 10px;
+            padding: 12px;
             width: 100%;
-            max-width: 620px; /* 限制電腦版最大寬度 */
-            box-sizing: border-box;
+            max-width: 620px;
             display: flex;
-            justify-content: center;
+            justify-content: center; /* 確保畫布在容器內水平置中 */
             align-items: center;
         }
         canvas {
             cursor: crosshair;
             display: block;
-            width: 100%; /* 關鍵：讓畫布寬度跟隨外框自動縮放 */
+            width: calc(100% - 10px); /* 關鍵修正：留出微小安全邊界，防止任何手機型號切邊 */
             height: auto;
-            max-width: 600px;
+            max-width: 580px;
+            margin: 0 auto; /* 強制畫布本身在水平居中 */
         }
         .control-panel {
             flex: 1;
             min-width: 320px;
-            max-width: 500px;
+            max-width: 480px;
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -70,7 +78,6 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            box-sizing: border-box;
         }
         .data-display {
             background-color: #f8f9fa;
@@ -87,7 +94,7 @@
             font-size: 0.9rem;
             font-weight: bold;
             color: #7f8c8d;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #eee;
             padding-bottom: 3px;
         }
@@ -95,7 +102,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .checkbox-label {
             display: flex;
@@ -125,15 +132,15 @@
             line-height: 1.4;
         }
 
-        /* 響應式斷點設定：當螢幕寬度小於 800px（如手機、直立型平板）*/
-        @media (max-width: 800px) {
+        /* 響應式中斷點設定：當螢幕寬度小於 850px（如手機或直向平板）*/
+        @media (max-width: 850px) {
             .container {
-                flex-direction: column; /* 強制切換為上下排列 */
-                align-items: center;
+                flex-direction: column; /* 切換為上下排列 */
+                align-items: center; /* 上下元素皆水平置中 */
             }
-            .control-panel {
+            .canvas-container, .control-panel {
                 width: 100%;
-                max-width: 620px;
+                max-width: 580px; /* 限制手機版群組寬度，視覺比例最和諧 */
             }
         }
     </style>
@@ -207,7 +214,6 @@
         const canvas = document.getElementById('circleCanvas');
         const ctx = canvas.getContext('2d');
         
-        // 畫布內部邏輯座標固定為 600x600 運算
         const cx = 300;
         const cy = 300;
         const radius = 200; 
@@ -226,7 +232,6 @@
             draw();
         }
 
-        // 行動裝置與電腦端事件監聽
         canvas.addEventListener('mousedown', startDrag);
         canvas.addEventListener('mousemove', drag);
         window.addEventListener('mouseup', endDrag);
@@ -241,7 +246,7 @@
             const pY = cy - radius * Math.sin(rad);
             const dist = Math.hypot(pos.x - pX, pos.y - pY);
             
-            if (dist < 35) { // 加大手機觸控判定範圍
+            if (dist < 35) { 
                 isDragging = true;
                 e.preventDefault();
             }
@@ -263,13 +268,11 @@
             isDragging = false;
         }
 
-        // 關鍵修正：計算滑鼠/點擊位置時，引入比例換算，確保在縮小的網頁上依然精準
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             
-            // 由於 CSS 縮放了畫布，所以要把實際點擊座標依比例映射回 600x600 的畫布內部座標
             return { 
                 x: (clientX - rect.left) * (canvas.width / rect.width), 
                 y: (clientY - rect.top) * (canvas.height / rect.height) 
@@ -336,119 +339,4 @@
             ctx.stroke();
 
             // 3. y = x 參考線
-            if (document.getElementById('chk_90_minus').checked) {
-                ctx.beginPath();
-                ctx.setLineDash([3, 3]);
-                ctx.strokeStyle = '#7f8c8d';
-                ctx.moveTo(cx - radius*1.1, cy + radius*1.1);
-                ctx.lineTo(cx + radius*1.1, cy - radius*1.1);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-
-            // 4. 繪製主動點 P
-            const radP = thetaDeg * Math.PI / 180;
-            const pX = cx + radius * Math.cos(radP);
-            const pY = cy - radius * Math.sin(radP);
-
-            ctx.beginPath();
-            ctx.strokeStyle = '#3498db';
-            ctx.lineWidth = 1.5;
-            ctx.moveTo(cx, cy); ctx.lineTo(pX, pY);
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.fillStyle = '#3498db';
-            ctx.arc(pX, pY, 6, 0, 2 * Math.PI);
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.strokeStyle = '#3498db44';
-            ctx.lineWidth = 3;
-            ctx.arc(pX, pY, 12, 0, 2 * Math.PI);
-            ctx.stroke();
-
-            // 標註 P 座標 (稍微縮減邊距避免超出畫面)
-            ctx.font = 'bold 14px Arial';
-            ctx.fillStyle = '#3498db';
-            let offsetX = Math.cos(radP) >= 0 ? 12 : -135;
-            let offsetY = Math.sin(radP) >= 0 ? -12 : 18;
-            ctx.fillText(`P(cos ${thetaDeg}°, sin ${thetaDeg}°)`, pX + offsetX, pY + offsetY);
-
-            drawThetaArc(thetaDeg, '#27ae60');
-
-            // 5. 面板基本資訊
-            document.getElementById('degValue').innerText = thetaDeg;
-            document.getElementById('pCoordDisplay').innerText = `P(cos ${thetaDeg}°, sin ${thetaDeg}°)`;
-
-            // 6. 計算與繪製對稱點 P'
-            let showPrime = false;
-            let pPrimeTheta = 0;
-            let pPrimeLabel = '';
-            let pPrimeColor = '';
-
-            if (document.getElementById('chk_pi_minus').checked) {
-                showPrime = true; pPrimeTheta = 180 - thetaDeg; pPrimeLabel = '180° - θ'; pPrimeColor = '#e74c3c';
-            } else if (document.getElementById('chk_pi_plus').checked) {
-                showPrime = true; pPrimeTheta = 180 + thetaDeg; pPrimeLabel = '180° + θ'; pPrimeColor = '#e67e22';
-            } else if (document.getElementById('chk_neg').checked) {
-                showPrime = true; pPrimeTheta = -thetaDeg; pPrimeLabel = '-θ'; pPrimeColor = '#9b59b6';
-            } else if (document.getElementById('chk_90_minus').checked) {
-                showPrime = true; pPrimeTheta = 90 - thetaDeg; pPrimeLabel = '90° - θ'; pPrimeColor = '#2980b9';
-            } else if (document.getElementById('chk_90_plus').checked) {
-                showPrime = true; pPrimeTheta = 90 + thetaDeg; pPrimeLabel = '90° + θ'; pPrimeColor = '#16a085';
-            } else if (document.getElementById('chk_270_minus').checked) {
-                showPrime = true; pPrimeTheta = 270 - thetaDeg; pPrimeLabel = '270° - θ'; pPrimeColor = '#795548'; // 改用深棕
-            } else if (document.getElementById('chk_270_plus').checked) {
-                showPrime = true; pPrimeTheta = 270 + thetaDeg; pPrimeLabel = '270° + θ'; pPrimeColor = '#8e44ad';
-            }
-
-            const pPrimeDisplayNode = document.getElementById('pPrimeDisplay');
-            if (showPrime) {
-                const radPPrime = pPrimeTheta * Math.PI / 180;
-                const ppX = cx + radius * Math.cos(radPPrime);
-                const ppY = cy - radius * Math.sin(radPPrime);
-
-                // 對稱連接虛線
-                ctx.beginPath();
-                ctx.setLineDash([4, 4]);
-                ctx.strokeStyle = pPrimeColor + 'aa';
-                ctx.moveTo(pX, pY); ctx.lineTo(ppX, ppY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // P' 徑向線
-                ctx.beginPath();
-                ctx.strokeStyle = pPrimeColor;
-                ctx.lineWidth = 1.2;
-                ctx.moveTo(cx, cy); ctx.lineTo(ppX, ppY);
-                ctx.stroke();
-
-                // P' 實心點
-                ctx.beginPath();
-                ctx.fillStyle = pPrimeColor;
-                ctx.arc(ppX, ppY, 6, 0, 2 * Math.PI);
-                ctx.fill();
-
-                // 標註 P' 座標
-                ctx.font = 'bold 14px Arial';
-                ctx.fillStyle = pPrimeColor;
-                let ppOffsetX = Math.cos(radPPrime) >= 0 ? 12 : -205;
-                let ppOffsetY = Math.sin(radPPrime) >= 0 ? -12 : 18;
-                ctx.fillText(`P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`, ppX + ppOffsetX, ppY + ppOffsetY);
-
-                // 繪製大廣義角橘色弧線
-                drawTargetArc(pPrimeTheta, pPrimeLabel);
-
-                pPrimeDisplayNode.style.display = 'block';
-                pPrimeDisplayNode.innerHTML = `<span class="math-text" style="color:${pPrimeColor}; font-weight:bold;">P'</span> 點座標：P'(cos(${pPrimeLabel}), sin(${pPrimeLabel}))`;
-            } else {
-                pPrimeDisplayNode.style.display = 'none';
-            }
-        }
-
-        // 啟動首次繪製
-        draw();
-    </script>
-</body>
-</html>
+            if (
